@@ -212,7 +212,7 @@ Current URL: ${API_BASE_URL}`);
           {/* Debug: Show prediction state */}
           {prediction !== null && (
             <div className="debug-display">
-              Debug: Prediction = ${prediction.toFixed(2)}k
+              House: Price = ${prediction.toFixed(2)}k
             </div>
           )}
 
