@@ -21,11 +21,30 @@ function App() {
   const [prediction, setPrediction] = useState(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+  const [connectionStatus, setConnectionStatus] = useState('checking');
 
-  // Use Render backend URL in production, localhost in development
+  // Use your actual Render backend URL here
   const API_BASE_URL = import.meta.env.PROD 
-    ? 'https://house-price-prediction-kgtk.onrender.com'  // Replace with your actual Render URL
+    ? 'https://house-price-prediction-kgtk.onrender.com'  // ← UPDATE THIS WITH YOUR RENDER URL
     : 'http://localhost:5000';
+
+  // Test connection on component mount
+  useState(() => {
+    testConnection();
+  });
+
+  const testConnection = async () => {
+    try {
+      const response = await axios.get(`${API_BASE_URL}/api/health`, { timeout: 5000 });
+      if (response.data.status === 'healthy') {
+        setConnectionStatus('connected');
+      } else {
+        setConnectionStatus('disconnected');
+      }
+    } catch (err) {
+      setConnectionStatus('disconnected');
+    }
+  };
 
   const handleInputChange = (feature, value) => {
     setFeatures(prev => ({
@@ -41,26 +60,38 @@ function App() {
     setPrediction(null);
 
     try {
+      console.log('Making request to:', `${API_BASE_URL}/api/predict`);
+      console.log('Features:', features);
+      
       const response = await axios.post(`${API_BASE_URL}/api/predict`, {
         features: features
       }, {
-        timeout: 10000 // 10 second timeout
+        timeout: 15000, // 15 second timeout
+        headers: {
+          'Content-Type': 'application/json',
+        }
       });
+      
+      console.log('Response received:', response.data);
       
       if (response.data.status === 'success') {
         setPrediction(response.data.prediction);
       } else {
-        setError('Prediction failed: ' + response.data.error);
+        setError(`Prediction failed: ${response.data.error || 'Unknown error'}`);
       }
     } catch (err) {
+      console.error('Detailed error:', err);
+      
       if (err.code === 'ECONNABORTED') {
-        setError('Request timeout - server might be slow to respond');
+        setError('Request timeout - server took too long to respond. Please try again.');
       } else if (err.response) {
-        setError(`Server error: ${err.response.status} - ${err.response.data.error || 'Unknown error'}`);
+        setError(`Server error: ${err.response.status} - ${err.response.data.error || JSON.stringify(err.response.data)}`);
       } else if (err.request) {
-        setError('Network error - make sure the backend server is running');
+        setError(`Network error - unable to reach the server. 
+Make sure your backend is deployed and the URL is correct. 
+Current URL: ${API_BASE_URL}`);
       } else {
-        setError('Error: ' + err.message);
+        setError(`Error: ${err.message}`);
       }
     } finally {
       setLoading(false);
@@ -88,6 +119,30 @@ function App() {
       <header className="app-header">
         <h1>🏠 House Price Prediction</h1>
         <p>Predict house prices using machine learning</p>
+        <div style={{ 
+          marginTop: '10px', 
+          fontSize: '0.9rem',
+          display: 'flex',
+          justifyContent: 'center',
+          alignItems: 'center',
+          gap: '10px'
+        }}>
+          <span style={{
+            padding: '4px 10px',
+            borderRadius: '15px',
+            fontSize: '0.8rem',
+            fontWeight: 'bold',
+            backgroundColor: connectionStatus === 'connected' ? '#4CAF50' : 
+                           connectionStatus === 'disconnected' ? '#f44336' : '#FFC107',
+            color: 'white'
+          }}>
+            {connectionStatus === 'connected' ? '🟢 Connected' : 
+             connectionStatus === 'disconnected' ? '🔴 Disconnected' : '🟡 Checking...'}
+          </span>
+          <small style={{color: 'rgba(255,255,255,0.8)'}}>
+            API: {API_BASE_URL.replace('https://', '').replace('http://', '')}
+          </small>
+        </div>
       </header>
 
       <main className="app-main">
@@ -99,7 +154,7 @@ function App() {
               {Object.entries(features).map(([key, value]) => (
                 <div key={key} className="feature-input">
                   <label title={featureDescriptions[key]}>
-                    {key}:
+                    {key}
                   </label>
                   <input
                     type="number"
@@ -107,6 +162,7 @@ function App() {
                     value={value}
                     onChange={(e) => handleInputChange(key, e.target.value)}
                     required
+                    disabled={loading}
                   />
                   <small>{featureDescriptions[key]}</small>
                 </div>
@@ -116,22 +172,38 @@ function App() {
             <button 
               type="submit" 
               disabled={loading}
-              className="predict-button"
+              className={`predict-button ${loading ? 'loading' : ''}`}
             >
-              {loading ? 'Predicting...' : 'Predict Price'}
+              {loading ? (
+                <>
+                  <span style={{marginRight: '10px'}}>⏳</span>
+                  Calculating...
+                </>
+              ) : (
+                '🔮 Predict Price'
+              )}
             </button>
           </form>
 
           {error && (
             <div className="error-message">
-              <h3>Error</h3>
+              <h3>❌ Something went wrong</h3>
               <p>{error}</p>
+              <details style={{marginTop: '15px', background: 'rgba(255,255,255,0.2)', padding: '10px', borderRadius: '8px'}}>
+                <summary style={{cursor: 'pointer', fontWeight: 'bold'}}>Troubleshooting Tips</summary>
+                <ul style={{textAlign: 'left', marginTop: '10px', paddingLeft: '20px'}}>
+                  <li>Verify your backend URL is correct in App.jsx</li>
+                  <li>Check that your backend service is running on Render</li>
+                  <li>Confirm the model file is present in your backend deployment</li>
+                  <li>Try accessing {`${API_BASE_URL}/api/health`} directly in your browser</li>
+                </ul>
+              </details>
             </div>
           )}
 
           {prediction !== null && (
             <div className="result-container">
-              <h3>Predicted House Price</h3>
+              <h3>🎉 Prediction Result</h3>
               <div className="prediction-result">
                 ${prediction.toFixed(2)}k
               </div>

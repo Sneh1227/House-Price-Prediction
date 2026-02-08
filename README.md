@@ -115,9 +115,9 @@ Response:
 }
 ```
 
-## 🚀 Deployment to Render
+## 🚀 Deployment
 
-### Method 1: Automatic Deployment (Recommended)
+### Backend Deployment (to Render)
 
 1. **Fork this repository** to your GitHub account
 2. **Sign up/Login** to [Render](https://render.com)
@@ -129,38 +129,25 @@ Response:
    - **Start Command**: `gunicorn --bind 0.0.0.0:$PORT backend.app:app`
    - **Environment Variables**: Add `PORT=10000`
 
-### Method 2: Manual Deployment
+### Frontend Deployment (to Vercel)
 
-1. **Create a sample model** (if not already created):
-```bash
-cd backend
-python create_sample_model.py
-```
+1. **Deploy to Vercel:**
+   - Go to [Vercel](https://vercel.com)
+   - Import your forked repository
+   - Configure build settings:
+     - **Build Command**: `npm run build`
+     - **Output Directory**: `dist` (or `build` depending on your setup)
+     - **Install Command**: `npm install`
 
-2. **Commit your changes:**
-```bash
-git add .
-git commit -m "Prepare for Render deployment"
-git push
-```
-
-3. **Deploy to Render:**
-   - Go to Render Dashboard
-   - Click "New Web Service"
-   - Connect your GitHub repository
-   - Configure as shown above
-
-### Frontend Deployment
-
-For deploying the frontend separately:
-
-1. **Build the frontend:**
-```bash
-cd frontend
-npm run build
-```
-
-2. **Deploy the `dist` folder** to any static hosting service (Netlify, Vercel, etc.)
+2. **Update API URL in frontend:**
+   - After deploying your backend to Render, copy the Render URL
+   - In `frontend/src/App.jsx`, replace the placeholder URL:
+   ```javascript
+   const API_BASE_URL = import.meta.env.PROD 
+     ? 'https://your-render-app-name.onrender.com'  // ← Update with your actual Render URL
+     : 'http://localhost:5000';
+   ```
+   - Re-deploy the frontend to Vercel
 
 ## 🔧 Environment Variables
 
@@ -238,3 +225,4 @@ This project is licensed under the MIT License - see the LICENSE file for detail
 - Flask for the web framework
 - React for the frontend framework
 - Render for deployment platform
+- Vercel for frontend hosting
