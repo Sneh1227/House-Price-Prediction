@@ -155,7 +155,7 @@ Current URL: ${API_BASE_URL}`);
              connectionStatus === 'disconnected' ? '🔴 Disconnected' : '🟡 Checking...'}
           </span>
           <small style={{color: 'rgba(255,255,255,0.8)'}}>
-            API: {API_BASE_URL.replace('https://', '').replace('http://', '')}
+            
           </small>
         </div>
       </header>
