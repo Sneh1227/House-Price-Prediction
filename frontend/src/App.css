@@ -223,6 +223,7 @@
   align-items: center;
   justify-content: center;
   gap: 10px;
+  color: #1a1a2e; /* Dark navy blue for better contrast */
 }
 
 .result-container h3::before {
@@ -235,7 +236,7 @@
   font-weight: 800;
   margin: 2rem 0;
   text-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
-  color: white; /* Solid white text for visibility */
+  color: #1a1a2e; /* Dark navy blue for maximum visibility */
   position: relative;
   z-index: 1;
   animation: pulseGlow 2s infinite;
@@ -248,7 +249,7 @@
     transform: scale(1);
   }
   50% { 
-    text-shadow: 0 6px 12px rgba(0, 0, 0, 0.4), 0 0 20px rgba(255, 255, 255, 0.5);
+    text-shadow: 0 6px 12px rgba(0, 0, 0, 0.4), 0 0 20px rgba(26, 26, 46, 0.3);
     transform: scale(1.02);
   }
 }
@@ -265,7 +266,7 @@
   padding: 15px 20px;
   border-radius: 12px;
   backdrop-filter: blur(5px);
-  color: white;
+  color: #1a1a2e; /* Dark navy blue for readability */
 }
 
 .app-footer {
@@ -287,7 +288,7 @@
   background: rgba(255, 255, 255, 0.2);
   border-radius: 10px;
   font-size: 0.9rem;
-  color: #fff;
+  color: #1a1a2e; /* Dark navy blue for contrast */
   font-weight: 500;
   backdrop-filter: blur(5px);
 }
