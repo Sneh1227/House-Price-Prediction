@@ -26,7 +26,7 @@ function App() {
   // Use your actual Render backend URL here
   const API_BASE_URL = import.meta.env.PROD 
     ? 'https://house-price-prediction-kgtk.onrender.com'  // ← UPDATE THIS WITH YOUR ACTUAL RENDER URL
-    : 'http://localhost:10000';  // Changed from 5000 to 10000 to match Render config
+    : 'http://localhost:10000';
 
   // Test connection when component mounts
   useEffect(() => {
@@ -61,6 +61,8 @@ function App() {
     e.preventDefault();
     setLoading(true);
     setError('');
+    
+    // Clear previous prediction immediately when submitting new request
     setPrediction(null);
 
     try {
@@ -79,7 +81,11 @@ function App() {
       console.log('Response received:', response.data);
       
       if (response.data.status === 'success') {
-        setPrediction(response.data.prediction);
+        // Force state update with callback to ensure it's processed
+        setPrediction(prev => {
+          console.log('Setting prediction to:', response.data.prediction);
+          return response.data.prediction;
+        });
       } else {
         setError(`Prediction failed: ${response.data.error || 'Unknown error'}`);
       }
@@ -117,6 +123,11 @@ Current URL: ${API_BASE_URL}`);
     B: "1000(Bk - 0.63)² where Bk is the proportion of Black people by town",
     LSTAT: "% lower status of the population"
   };
+
+  // Debug: Log prediction state changes
+  useEffect(() => {
+    console.log('Prediction state changed to:', prediction);
+  }, [prediction]);
 
   return (
     <div className="App">
@@ -198,9 +209,15 @@ Current URL: ${API_BASE_URL}`);
             </div>
           )}
 
+          {/* Debug: Show prediction state */}
+          <div style={{textAlign: 'center', margin: '10px 0', fontSize: '0.9rem', color: '#666'}}>
+            Debug: Prediction state = {prediction !== null ? `$${prediction.toFixed(2)}k` : 'null'}
+          </div>
+
+          {/* Main result display */}
           {prediction !== null && (
             <div className="result-container">
-              <h3>Prediction Result</h3>
+              <h3>🎉 Prediction Result</h3>
               <div className="prediction-result">
                 ${prediction.toFixed(2)}k
               </div>
