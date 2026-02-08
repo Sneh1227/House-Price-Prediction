@@ -3,304 +3,151 @@ import axios from 'axios'
 import './App.css'
 
 function App() {
-  const [formData, setFormData] = useState({
-    CRIM: '',
-    ZN: '',
-    INDUS: '',
-    CHAS: '0',
-    NOX: '',
-    RM: '',
-    AGE: '',
-    DIS: '',
-    RAD: '',
-    TAX: '',
-    PTRATIO: '',
-    B: '',
-    LSTAT: ''
-  })
+  const [features, setFeatures] = useState({
+    CRIM: 0.00632,
+    ZN: 18.0,
+    INDUS: 2.31,
+    CHAS: 0,
+    NOX: 0.538,
+    RM: 6.575,
+    AGE: 65.2,
+    DIS: 4.0900,
+    RAD: 1,
+    TAX: 296.0,
+    PTRATIO: 15.3,
+    B: 396.90,
+    LSTAT: 4.98
+  });
+  const [prediction, setPrediction] = useState(null);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
 
-  const [prediction, setPrediction] = useState(null)
-  const [loading, setLoading] = useState(false)
-  const [error, setError] = useState('')
+  // Use Render backend URL in production, localhost in development
+  const API_BASE_URL = import.meta.env.PROD 
+    ? 'https://house-price-prediction-kgtk.onrender.com'  // Replace with your actual Render URL
+    : 'http://localhost:5000';
 
-  const handleChange = (e) => {
-    setFormData({
-      ...formData,
-      [e.target.name]: e.target.value
-    })
-  }
+  const handleInputChange = (feature, value) => {
+    setFeatures(prev => ({
+      ...prev,
+      [feature]: parseFloat(value) || 0
+    }));
+  };
 
   const handleSubmit = async (e) => {
-    e.preventDefault()
-    setLoading(true)
-    setError('')
-    setPrediction(null)
+    e.preventDefault();
+    setLoading(true);
+    setError('');
+    setPrediction(null);
 
     try {
-      // Convert form data to numbers
-      const numericData = {}
-      Object.keys(formData).forEach(key => {
-        if (formData[key] !== '') {
-          numericData[key] = parseFloat(formData[key]) || parseInt(formData[key])
-        } else {
-          numericData[key] = 0
-        }
-      })
-
-      const response = await axios.post('/api/predict', {
-        features: numericData
-      })
-
-      setPrediction(response.data.prediction)
+      const response = await axios.post(`${API_BASE_URL}/api/predict`, {
+        features: features
+      }, {
+        timeout: 10000 // 10 second timeout
+      });
+      
+      if (response.data.status === 'success') {
+        setPrediction(response.data.prediction);
+      } else {
+        setError('Prediction failed: ' + response.data.error);
+      }
     } catch (err) {
-      setError('Error making prediction. Please check your inputs and try again.')
-      console.error('Prediction error:', err)
+      if (err.code === 'ECONNABORTED') {
+        setError('Request timeout - server might be slow to respond');
+      } else if (err.response) {
+        setError(`Server error: ${err.response.status} - ${err.response.data.error || 'Unknown error'}`);
+      } else if (err.request) {
+        setError('Network error - make sure the backend server is running');
+      } else {
+        setError('Error: ' + err.message);
+      }
     } finally {
-      setLoading(false)
+      setLoading(false);
     }
-  }
+  };
+
+  const featureDescriptions = {
+    CRIM: "Per capita crime rate by town",
+    ZN: "Proportion of residential land zoned for lots over 25,000 sq.ft.",
+    INDUS: "Proportion of non-retail business acres per town",
+    CHAS: "Charles River dummy variable (1 if tract bounds river; 0 otherwise)",
+    NOX: "Nitric oxides concentration (parts per 10 million)",
+    RM: "Average number of rooms per dwelling",
+    AGE: "Proportion of owner-occupied units built prior to 1940",
+    DIS: "Weighted distances to five Boston employment centres",
+    RAD: "Index of accessibility to radial highways",
+    TAX: "Full-value property-tax rate per $10,000",
+    PTRATIO: "Pupil-teacher ratio by town",
+    B: "1000(Bk - 0.63)² where Bk is the proportion of Black people by town",
+    LSTAT: "% lower status of the population"
+  };
 
   return (
-    <div className="container">
-      <div className="header">
-        <h1>🏠 Boston Housing Price Predictor</h1>
-        <p>Enter Boston suburb housing features to predict median home value</p>
-      </div>
+    <div className="App">
+      <header className="app-header">
+        <h1>🏠 House Price Prediction</h1>
+        <p>Predict house prices using machine learning</p>
+      </header>
 
-      <div className="form-container">
-        <form onSubmit={handleSubmit}>
-          <div className="form-row">
-            <div className="form-group">
-              <label htmlFor="CRIM">CRIM - Per capita crime rate</label>
-              <input
-                type="number"
-                id="CRIM"
-                name="CRIM"
-                value={formData.CRIM}
-                onChange={handleChange}
-                min="0"
-                step="0.01"
-                required
-              />
+      <main className="app-main">
+        <div className="prediction-container">
+          <form onSubmit={handleSubmit} className="prediction-form">
+            <h2>Enter Housing Features</h2>
+            
+            <div className="features-grid">
+              {Object.entries(features).map(([key, value]) => (
+                <div key={key} className="feature-input">
+                  <label title={featureDescriptions[key]}>
+                    {key}:
+                  </label>
+                  <input
+                    type="number"
+                    step="any"
+                    value={value}
+                    onChange={(e) => handleInputChange(key, e.target.value)}
+                    required
+                  />
+                  <small>{featureDescriptions[key]}</small>
+                </div>
+              ))}
             </div>
 
-            <div className="form-group">
-              <label htmlFor="ZN">ZN - Proportion of residential land (&gt;25,000 sq.ft.)</label>
-              <input
-                type="number"
-                id="ZN"
-                name="ZN"
-                value={formData.ZN}
-                onChange={handleChange}
-                min="0"
-                max="100"
-                step="0.1"
-                required
-              />
+            <button 
+              type="submit" 
+              disabled={loading}
+              className="predict-button"
+            >
+              {loading ? 'Predicting...' : 'Predict Price'}
+            </button>
+          </form>
+
+          {error && (
+            <div className="error-message">
+              <h3>Error</h3>
+              <p>{error}</p>
             </div>
-          </div>
+          )}
 
-          <div className="form-row">
-            <div className="form-group">
-              <label htmlFor="INDUS">INDUS - Non-retail business acres</label>
-              <input
-                type="number"
-                id="INDUS"
-                name="INDUS"
-                value={formData.INDUS}
-                onChange={handleChange}
-                min="0"
-                max="100"
-                step="0.1"
-                required
-              />
+          {prediction !== null && (
+            <div className="result-container">
+              <h3>Predicted House Price</h3>
+              <div className="prediction-result">
+                ${prediction.toFixed(2)}k
+              </div>
+              <p className="prediction-note">
+                This is the predicted median value of owner-occupied homes in $1000s
+              </p>
             </div>
+          )}
+        </div>
+      </main>
 
-            <div className="form-group">
-              <label htmlFor="CHAS">CHAS - Charles River dummy (1 if bounds river)</label>
-              <select
-                id="CHAS"
-                name="CHAS"
-                value={formData.CHAS}
-                onChange={handleChange}
-                required
-              >
-                <option value="0">0 - Does not bound river</option>
-                <option value="1">1 - Bounds river</option>
-              </select>
-            </div>
-          </div>
-
-          <div className="form-row">
-            <div className="form-group">
-              <label htmlFor="NOX">NOX - Nitric oxides concentration (ppm)</label>
-              <input
-                type="number"
-                id="NOX"
-                name="NOX"
-                value={formData.NOX}
-                onChange={handleChange}
-                min="0"
-                step="0.01"
-                required
-              />
-            </div>
-
-            <div className="form-group">
-              <label htmlFor="RM">RM - Average rooms per dwelling</label>
-              <input
-                type="number"
-                id="RM"
-                name="RM"
-                value={formData.RM}
-                onChange={handleChange}
-                min="0"
-                step="0.1"
-                required
-              />
-            </div>
-          </div>
-
-          <div className="form-row">
-            <div className="form-group">
-              <label htmlFor="AGE">AGE - Owner-occupied units built prior to 1940 (%)</label>
-              <input
-                type="number"
-                id="AGE"
-                name="AGE"
-                value={formData.AGE}
-                onChange={handleChange}
-                min="0"
-                max="100"
-                step="0.1"
-                required
-              />
-            </div>
-
-            <div className="form-group">
-              <label htmlFor="DIS">DIS - Weighted distances to employment centers</label>
-              <input
-                type="number"
-                id="DIS"
-                name="DIS"
-                value={formData.DIS}
-                onChange={handleChange}
-                min="0"
-                step="0.1"
-                required
-              />
-            </div>
-          </div>
-
-          <div className="form-row">
-            <div className="form-group">
-              <label htmlFor="RAD">RAD - Accessibility to radial highways</label>
-              <input
-                type="number"
-                id="RAD"
-                name="RAD"
-                value={formData.RAD}
-                onChange={handleChange}
-                min="1"
-                max="24"
-                step="1"
-                required
-              />
-            </div>
-
-            <div className="form-group">
-              <label htmlFor="TAX">TAX - Property-tax rate per $10,000</label>
-              <input
-                type="number"
-                id="TAX"
-                name="TAX"
-                value={formData.TAX}
-                onChange={handleChange}
-                min="0"
-                required
-              />
-            </div>
-          </div>
-
-          <div className="form-row">
-            <div className="form-group">
-              <label htmlFor="PTRATIO">PTRATIO - Pupil-teacher ratio</label>
-              <input
-                type="number"
-                id="PTRATIO"
-                name="PTRATIO"
-                value={formData.PTRATIO}
-                onChange={handleChange}
-                min="0"
-                step="0.1"
-                required
-              />
-            </div>
-
-            <div className="form-group">
-              <label htmlFor="B">B - Proportion of blacks (1000(Bk - 0.63)^2)</label>
-              <input
-                type="number"
-                id="B"
-                name="B"
-                value={formData.B}
-                onChange={handleChange}
-                min="0"
-                step="0.1"
-                required
-              />
-            </div>
-          </div>
-
-          <div className="form-row">
-            <div className="form-group">
-              <label htmlFor="LSTAT">LSTAT - Lower status population (%)</label>
-              <input
-                type="number"
-                id="LSTAT"
-                name="LSTAT"
-                value={formData.LSTAT}
-                onChange={handleChange}
-                min="0"
-                max="100"
-                step="0.1"
-                required
-              />
-            </div>
-          </div>
-
-          <button 
-            type="submit" 
-            className="predict-btn"
-            disabled={loading}
-          >
-            {loading ? 'Predicting...' : 'Predict Boston Housing Price'}
-          </button>
-        </form>
-
-        {error && <div className="error">{error}</div>}
-
-        {loading && (
-          <div className="loading">
-            <p>🤖 Analyzing Boston housing data...</p>
-          </div>
-        )}
-
-        {prediction && (
-          <div className="result-container show">
-            <h2 className="result-title">💰 Predicted Median Home Value</h2>
-            <div className="price-display">
-              ${(prediction * 1000).toLocaleString('en-US', {
-                minimumFractionDigits: 0,
-                maximumFractionDigits: 0
-              })}
-            </div>
-            <p>Median value of owner-occupied homes (in USD)<br/>Based on Boston suburb data</p>
-          </div>
-        )}
-      </div>
+      <footer className="app-footer">
+        <p>Built with React, Flask, and scikit-learn</p>
+      </footer>
     </div>
-  )
+  );
 }
 
 export default App

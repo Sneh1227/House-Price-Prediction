@@ -87,4 +87,6 @@ def health():
     })
 
 if __name__ == '__main__':
-    app.run()
+    # Use PORT environment variable for Render deployment, default to 5000 for local
+    port = int(os.environ.get('PORT', 5000))
+    app.run(host='0.0.0.0', port=port)

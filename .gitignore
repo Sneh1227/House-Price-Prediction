@@ -15,8 +15,19 @@ Thumbs.db
 
 # VS Code
 .vscode/
+
 # Node / frontend
 node_modules/
 package-lock.json
 dist/
 .build/
+
+# Model files (should not be in version control)
+*.pkl
+*.joblib
+
+# Log files
+*.log
+
+# Local config files
+config.local.json
