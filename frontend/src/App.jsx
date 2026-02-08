@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import axios from 'axios'
 import './App.css'
 
@@ -25,23 +25,27 @@ function App() {
 
   // Use your actual Render backend URL here
   const API_BASE_URL = import.meta.env.PROD 
-    ? 'https://house-price-prediction-kgtk.onrender.com'  // ← UPDATE THIS WITH YOUR RENDER URL
+    ? 'https://house-price-prediction-kgtk.onrender.com'  // ← UPDATE THIS WITH YOUR ACTUAL RENDER URL
     : 'http://localhost:5000';
 
-  // Test connection on component mount
-  useState(() => {
+  // Test connection when component mounts
+  useEffect(() => {
     testConnection();
-  });
+  }, []);
 
   const testConnection = async () => {
     try {
-      const response = await axios.get(`${API_BASE_URL}/api/health`, { timeout: 5000 });
+      const response = await axios.get(`${API_BASE_URL}/api/health`, { 
+        timeout: 5000,
+        validateStatus: (status) => status < 500
+      });
       if (response.data.status === 'healthy') {
         setConnectionStatus('connected');
       } else {
         setConnectionStatus('disconnected');
       }
     } catch (err) {
+      console.error('Connection test failed:', err);
       setConnectionStatus('disconnected');
     }
   };
@@ -66,7 +70,7 @@ function App() {
       const response = await axios.post(`${API_BASE_URL}/api/predict`, {
         features: features
       }, {
-        timeout: 15000, // 15 second timeout
+        timeout: 15000,
         headers: {
           'Content-Type': 'application/json',
         }
@@ -172,22 +176,15 @@ Current URL: ${API_BASE_URL}`);
             <button 
               type="submit" 
               disabled={loading}
-              className={`predict-button ${loading ? 'loading' : ''}`}
+              className="predict-button"
             >
-              {loading ? (
-                <>
-                  <span style={{marginRight: '10px'}}>⏳</span>
-                  Calculating...
-                </>
-              ) : (
-                '🔮 Predict Price'
-              )}
+              {loading ? 'Calculating...' : '🔮 Predict Price'}
             </button>
           </form>
 
           {error && (
             <div className="error-message">
-              <h3>❌ Something went wrong</h3>
+              <h3>Something went wrong</h3>
               <p>{error}</p>
               <details style={{marginTop: '15px', background: 'rgba(255,255,255,0.2)', padding: '10px', borderRadius: '8px'}}>
                 <summary style={{cursor: 'pointer', fontWeight: 'bold'}}>Troubleshooting Tips</summary>
@@ -203,7 +200,7 @@ Current URL: ${API_BASE_URL}`);
 
           {prediction !== null && (
             <div className="result-container">
-              <h3>🎉 Prediction Result</h3>
+              <h3>Prediction Result</h3>
               <div className="prediction-result">
                 ${prediction.toFixed(2)}k
               </div>
