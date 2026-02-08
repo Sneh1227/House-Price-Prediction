@@ -169,36 +169,104 @@
   font-size: 1rem;
 }
 
+/* Enhanced Result Container - Attractive Design */
 .result-container {
   background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
-  border-radius: 20px;
-  padding: 2.5rem;
+  border-radius: 25px;
+  padding: 3rem;
   text-align: center;
-  margin: 2rem 0;
+  margin: 2.5rem 0;
   color: white;
-  box-shadow: 0 15px 35px rgba(79, 172, 254, 0.4);
+  box-shadow: 0 20px 40px rgba(79, 172, 254, 0.4);
+  position: relative;
+  overflow: hidden;
+  border: 2px solid rgba(255, 255, 255, 0.2);
+  animation: resultAppear 0.6s cubic-bezier(0.22, 0.61, 0.36, 1) forwards;
+}
+
+@keyframes resultAppear {
+  from {
+    opacity: 0;
+    transform: scale(0.8) translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+
+.result-container::before {
+  content: '';
+  position: absolute;
+  top: -50%;
+  left: -50%;
+  width: 200%;
+  height: 200%;
+  background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 70%);
+  animation: rotate 8s linear infinite;
+  z-index: 0;
+}
+
+@keyframes rotate {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
 }
 
 .result-container h3 {
-  margin: 0 0 1.5rem 0;
-  font-size: 1.5rem;
-  font-weight: 500;
+  margin: 0 0 2rem 0;
+  font-size: 1.8rem;
+  font-weight: 600;
   text-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+  position: relative;
+  z-index: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+}
+
+.result-container h3::before {
+  content: '🏆';
+  font-size: 1.5rem;
 }
 
 .prediction-result {
-  font-size: 3.5rem;
+  font-size: 4rem;
   font-weight: 800;
-  margin: 1.5rem 0;
-  text-shadow: 0 3px 6px rgba(0, 0, 0, 0.3);
+  margin: 2rem 0;
+  text-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+  background: linear-gradient(45deg, #ffffff, #f0f8ff, #e6f7ff);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  position: relative;
+  z-index: 1;
+  animation: pulseGlow 2s infinite;
+}
+
+@keyframes pulseGlow {
+  0%, 100% { 
+    text-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+    transform: scale(1);
+  }
+  50% { 
+    text-shadow: 0 6px 12px rgba(0, 0, 0, 0.4), 0 0 20px rgba(255, 255, 255, 0.3);
+    transform: scale(1.02);
+  }
 }
 
 .prediction-note {
-  margin: 1.5rem 0 0 0;
+  margin: 2rem 0 0 0;
   opacity: 0.9;
-  font-size: 1rem;
+  font-size: 1.1rem;
   line-height: 1.6;
   font-weight: 300;
+  position: relative;
+  z-index: 1;
+  background: rgba(255, 255, 255, 0.15);
+  padding: 15px 20px;
+  border-radius: 12px;
+  backdrop-filter: blur(5px);
 }
 
 .app-footer {
@@ -210,6 +278,19 @@
   margin-top: auto;
   border-radius: 15px;
   margin-top: 2rem;
+}
+
+/* Debug display styling */
+.debug-display {
+  text-align: center;
+  margin: 15px 0;
+  padding: 10px;
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: 10px;
+  font-size: 0.9rem;
+  color: #fff;
+  font-weight: 500;
+  backdrop-filter: blur(5px);
 }
 
 /* Responsive Design */
@@ -233,11 +314,19 @@
   }
   
   .prediction-result {
-    font-size: 2.5rem;
+    font-size: 3rem;
   }
   
   .prediction-form h2 {
     font-size: 1.8rem;
+  }
+  
+  .result-container {
+    padding: 2rem;
+  }
+  
+  .result-container h3 {
+    font-size: 1.5rem;
   }
 }
 
@@ -261,5 +350,9 @@
   
   .feature-input small {
     font-size: 0.75rem;
+  }
+  
+  .prediction-result {
+    font-size: 2.5rem;
   }
 }

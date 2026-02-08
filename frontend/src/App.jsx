@@ -15,8 +15,8 @@ function App() {
     RAD: 1,
     TAX: 296.0,
     PTRATIO: 15.3,
-    B: 396.90,
-    LSTAT: 4.98
+    B: null,
+    LSTAT: null
   });
   const [prediction, setPrediction] = useState(null);
   const [loading, setLoading] = useState(false);
@@ -210,14 +210,16 @@ Current URL: ${API_BASE_URL}`);
           )}
 
           {/* Debug: Show prediction state */}
-          <div style={{textAlign: 'center', margin: '10px 0', fontSize: '0.9rem', color: '#666'}}>
-            Debug: Prediction state = {prediction !== null ? `$${prediction.toFixed(2)}k` : 'null'}
-          </div>
+          {prediction !== null && (
+            <div className="debug-display">
+              Debug: Prediction = ${prediction.toFixed(2)}k
+            </div>
+          )}
 
           {/* Main result display */}
           {prediction !== null && (
             <div className="result-container">
-              <h3>🎉 Prediction Result</h3>
+              <h3>Prediction Result</h3>
               <div className="prediction-result">
                 ${prediction.toFixed(2)}k
               </div>
