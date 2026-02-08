@@ -169,7 +169,7 @@
   font-size: 1rem;
 }
 
-/* Enhanced Result Container - Attractive Design */
+/* Enhanced Result Container - Attractive Design with Visible Text */
 .result-container {
   background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
   border-radius: 25px;
@@ -235,13 +235,11 @@
   font-weight: 800;
   margin: 2rem 0;
   text-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
-  background: linear-gradient(45deg, #ffffff, #f0f8ff, #e6f7ff);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
+  color: white; /* Solid white text for visibility */
   position: relative;
   z-index: 1;
   animation: pulseGlow 2s infinite;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
 }
 
 @keyframes pulseGlow {
@@ -250,7 +248,7 @@
     transform: scale(1);
   }
   50% { 
-    text-shadow: 0 6px 12px rgba(0, 0, 0, 0.4), 0 0 20px rgba(255, 255, 255, 0.3);
+    text-shadow: 0 6px 12px rgba(0, 0, 0, 0.4), 0 0 20px rgba(255, 255, 255, 0.5);
     transform: scale(1.02);
   }
 }
@@ -267,6 +265,7 @@
   padding: 15px 20px;
   border-radius: 12px;
   backdrop-filter: blur(5px);
+  color: white;
 }
 
 .app-footer {
