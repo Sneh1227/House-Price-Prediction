@@ -26,7 +26,7 @@ function App() {
   // Use your actual Render backend URL here
   const API_BASE_URL = import.meta.env.PROD 
     ? 'https://house-price-prediction-kgtk.onrender.com'  // ← UPDATE THIS WITH YOUR ACTUAL RENDER URL
-    : 'http://localhost:5000';
+    : 'http://localhost:10000';  // Changed from 5000 to 10000 to match Render config
 
   // Test connection when component mounts
   useEffect(() => {

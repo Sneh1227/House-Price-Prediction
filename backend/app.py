@@ -49,6 +49,9 @@ def predict():
     try:
         # Get data from request
         data = request.get_json()
+        if not data:
+            return jsonify({'error': 'No JSON data provided', 'status': 'error'}), 400
+            
         features = data.get('features', {})
         
         # Define feature order (Boston Housing dataset)
@@ -90,6 +93,6 @@ def health():
     })
 
 if __name__ == '__main__':
-    # Use PORT environment variable for Render deployment, default to 5000 for local
-    port = int(os.environ.get('PORT', 5000))
+    # Use PORT environment variable for Render deployment, default to 10000 for local
+    port = int(os.environ.get('PORT', 10000))  # Changed default to 10000
     app.run(host='0.0.0.0', port=port)
