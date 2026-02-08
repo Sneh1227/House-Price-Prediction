@@ -6,12 +6,15 @@ import joblib
 import os
 
 app = Flask(__name__)
-CORS(app)  # This will allow requests from the frontend
+CORS(app, resources={
+    r"/api/*": {"origins": "*"},
+    r"/": {"origins": "*"}
+})  # This will allow requests from the frontend
 
 # Load your trained model
 # You'll need to save your model from Jupyter notebook using joblib or pickle
 model = None
-model_path = 'house_price_model.pkl'
+model_path = os.path.join(os.path.dirname(__file__), 'house_price_model.pkl')
 
 def load_model():
     global model

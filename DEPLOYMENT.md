@@ -25,7 +25,7 @@ git push origin main
 
    **Basic Settings:**
    - **Name**: `house-price-prediction-api`
-   - **Region**: Choose closest to your users
+   - **Region**: Oregon (or your preferred region)
    - **Branch**: `main`
    - **Root Directory**: Leave empty
    - **Environment**: `Python`
@@ -51,19 +51,13 @@ Edit `frontend/src/App.jsx` and replace the placeholder URL:
 ```javascript
 // Change this line:
 const API_BASE_URL = import.meta.env.PROD 
-  ? 'https://house-price-prediction-kgtk.onrender.com'  // ← Replace with your actual URL
+  ? 'https://house-price-prediction-api-xxxx.onrender.com'  // ← Replace with your actual URL
   : 'http://localhost:5000';
 ```
 
-### 5. Deploy Frontend (Optional)
+### 5. Deploy Frontend (Separately)
 
-You can deploy the frontend separately:
-
-**Option A: Deploy to Netlify (Easiest)**
-1. Build the frontend: `cd frontend && npm run build`
-2. Drag the `dist` folder to [Netlify Drop](https://app.netlify.com/drop)
-
-**Option B: Deploy to Render as Static Site**
+**Deploy to Render as Static Site:**
 1. Go to Render Dashboard
 2. Click "New Static Site"
 3. Connect your GitHub repository
@@ -71,6 +65,7 @@ You can deploy the frontend separately:
    - **Name**: `house-price-prediction-frontend`
    - **Build Command**: `cd frontend && npm install && npm run build`
    - **Publish Directory**: `frontend/dist`
+   - **Environment Variables**: `NODE_VERSION` = `18`
 
 ### 6. Test Your Deployment
 

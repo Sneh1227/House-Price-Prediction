@@ -3,6 +3,7 @@ services:
   - type: web
     name: house-price-prediction-api
     env: python
+    region: oregon
     buildCommand: "pip install -r requirements.txt"
     startCommand: "gunicorn --bind 0.0.0.0:$PORT backend.app:app"
     envVars:
@@ -10,8 +11,11 @@ services:
         value: 10000
 
   # Frontend Service
-  - type: web
+  - type: static
     name: house-price-prediction-frontend
     env: static
     buildCommand: "cd frontend && npm install && npm run build"
     staticPublishPath: ./frontend/dist
+    envVars:
+      - key: NODE_VERSION
+        value: 18
