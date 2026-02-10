@@ -15,8 +15,8 @@ function App() {
     RAD: 1,
     TAX: 296.0,
     PTRATIO: 15.3,
-    B: null,
-    LSTAT: null
+    B: 396.90,
+    LSTAT: 4.98
   });
   const [prediction, setPrediction] = useState(null);
   const [loading, setLoading] = useState(false);
@@ -36,10 +36,11 @@ function App() {
   const testConnection = async () => {
     try {
       const response = await axios.get(`${API_BASE_URL}/api/health`, { 
-        timeout: 5000,
+        timeout: 8000,  // Increased timeout
         validateStatus: (status) => status < 500
       });
-      if (response.data.status === 'healthy') {
+      console.log('Health check response:', response.data);
+      if (response.data.status === 'healthy' && response.data.model_loaded) {
         setConnectionStatus('connected');
       } else {
         setConnectionStatus('disconnected');
@@ -53,7 +54,7 @@ function App() {
   const handleInputChange = (feature, value) => {
     setFeatures(prev => ({
       ...prev,
-      [feature]: parseFloat(value) || 0
+      [feature]: feature === 'CHAS' ? parseInt(value) : parseFloat(value) || 0
     }));
   };
 
@@ -134,29 +135,11 @@ Current URL: ${API_BASE_URL}`);
       <header className="app-header">
         <h1>🏠 House Price Prediction</h1>
         <p>Predict house prices using machine learning</p>
-        <div style={{ 
-          marginTop: '10px', 
-          fontSize: '0.9rem',
-          display: 'flex',
-          justifyContent: 'center',
-          alignItems: 'center',
-          gap: '10px'
-        }}>
-          <span style={{
-            padding: '4px 10px',
-            borderRadius: '15px',
-            fontSize: '0.8rem',
-            fontWeight: 'bold',
-            backgroundColor: connectionStatus === 'connected' ? '#4CAF50' : 
-                           connectionStatus === 'disconnected' ? '#f44336' : '#FFC107',
-            color: 'white'
-          }}>
+        <div className="connection-status">
+          <span className={`status-indicator ${connectionStatus}`}>
             {connectionStatus === 'connected' ? '🟢 Connected' : 
              connectionStatus === 'disconnected' ? '🔴 Disconnected' : '🟡 Checking...'}
           </span>
-          <small style={{color: 'rgba(255,255,255,0.8)'}}>
-            
-          </small>
         </div>
       </header>
 
@@ -167,19 +150,32 @@ Current URL: ${API_BASE_URL}`);
             
             <div className="features-grid">
               {Object.entries(features).map(([key, value]) => (
-                <div key={key} className="feature-input">
-                  <label title={featureDescriptions[key]}>
-                    {key}
-                  </label>
-                  <input
-                    type="number"
-                    step="any"
-                    value={value}
-                    onChange={(e) => handleInputChange(key, e.target.value)}
-                    required
-                    disabled={loading}
-                  />
-                  <small>{featureDescriptions[key]}</small>
+                <div key={key} className="feature-card">
+                  <div className="feature-input">
+                    <label title={featureDescriptions[key]}>
+                      {key}
+                    </label>
+                    {key === 'CHAS' ? (
+                      <select
+                        value={value}
+                        onChange={(e) => handleInputChange(key, e.target.value)}
+                        disabled={loading}
+                      >
+                        <option value={0}>0 - Does not bound river</option>
+                        <option value={1}>1 - Bounds Charles River</option>
+                      </select>
+                    ) : (
+                      <input
+                        type="number"
+                        step="any"
+                        value={value}
+                        onChange={(e) => handleInputChange(key, e.target.value)}
+                        required
+                        disabled={loading}
+                      />
+                    )}
+                    <small>{featureDescriptions[key]}</small>
+                  </div>
                 </div>
               ))}
             </div>
@@ -197,9 +193,9 @@ Current URL: ${API_BASE_URL}`);
             <div className="error-message">
               <h3>Something went wrong</h3>
               <p>{error}</p>
-              <details style={{marginTop: '15px', background: 'rgba(255,255,255,0.2)', padding: '10px', borderRadius: '8px'}}>
-                <summary style={{cursor: 'pointer', fontWeight: 'bold'}}>Troubleshooting Tips</summary>
-                <ul style={{textAlign: 'left', marginTop: '10px', paddingLeft: '20px'}}>
+              <details style={{marginTop: '20px', background: 'rgba(255,255,255,0.2)', padding: '15px', borderRadius: '12px'}}>
+                <summary style={{cursor: 'pointer', fontWeight: 'bold', fontSize: '1.1rem'}}>Troubleshooting Tips</summary>
+                <ul style={{textAlign: 'left', marginTop: '15px', paddingLeft: '25px', lineHeight: '1.8'}}>
                   <li>Verify your backend URL is correct in App.jsx</li>
                   <li>Check that your backend service is running on Render</li>
                   <li>Confirm the model file is present in your backend deployment</li>
@@ -212,7 +208,7 @@ Current URL: ${API_BASE_URL}`);
           {/* Debug: Show prediction state */}
           {prediction !== null && (
             <div className="debug-display">
-              House: Price = ${prediction.toFixed(2)}k
+              House: Priced = ${prediction.toFixed(2)}k
             </div>
           )}
 
